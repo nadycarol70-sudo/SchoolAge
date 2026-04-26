@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -137,7 +137,8 @@ class _ThematicMapScreenState extends State<ThematicMapScreen> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                subdomains: const ['a', 'b', 'c', 'd'],
                 userAgentPackageName: 'com.example.schoolage',
               ),
               MarkerLayer(
@@ -152,13 +153,45 @@ class _ThematicMapScreenState extends State<ThematicMapScreen> {
                         showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(
-                            title: Text(school['name']),
+                            contentPadding: EdgeInsets.zero,
                             content: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Category: ${school['category']}'),
-                                Text('Governorate: ${school['governorate']}'),
+                                // School Image
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                                  child: Image.network(
+                                    school['image_url'] ?? 'https://via.placeholder.com/400x200?text=No+Image',
+                                    height: 180,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => Container(
+                                      height: 180,
+                                      color: Colors.grey[200],
+                                      child: const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        school['name'],
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text('Category: ${school['category']}'),
+                                      Text('Governorate: ${school['governorate']}'),
+                                      if (school['fees'] != null) ...[
+                                        const SizedBox(height: 4),
+                                        Text('Fees: ${school['fees']}', style: const TextStyle(fontWeight: FontWeight.w500)),
+                                      ],
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                             actions: [
